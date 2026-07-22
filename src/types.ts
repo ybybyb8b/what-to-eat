@@ -1,0 +1,85 @@
+export type IngredientCategory = '肉蛋' | '蔬菜' | '主食' | '豆制品' | '其他'
+export type Difficulty = '简单' | '中等' | '进阶'
+export type RecipeTag = '省时间' | '少洗锅' | '清淡' | '一锅完成'
+export type TakeoutCategory = '米饭' | '面食' | '快餐' | '小吃' | '清淡' | '其他'
+
+export interface Portion { ingredientId: string; amount: number; unit: string }
+export interface Substitution { ingredientId: string; alternatives: string[] }
+
+export interface Ingredient {
+  id: string
+  name: string
+  category: IngredientCategory
+  emoji: string
+  enabled: boolean
+}
+
+export interface Recipe {
+  id: string
+  name: string
+  description: string
+  required: Portion[]
+  optional: Portion[]
+  substitutions: Substitution[]
+  pantry: Portion[]
+  steps: string[]
+  minutes: number
+  difficulty: Difficulty
+  tags: RecipeTag[]
+  color: string
+}
+
+export interface MealPlan {
+  id: string
+  name: string
+  recipeIds: string[]
+  reason: string
+  tags: RecipeTag[]
+}
+
+export interface TakeoutOption {
+  id: string
+  name: string
+  category: TakeoutCategory
+  price: number
+  minutes: number
+  lastEatenAt?: string
+  color: string
+}
+
+export interface MealHistory {
+  id: string
+  kind: 'recipe' | 'mealPlan' | 'takeout'
+  itemId: string
+  name: string
+  eatenAt: string
+}
+
+export interface UserPreference {
+  itemId: string
+  favorite: boolean
+  rejectedCount: number
+}
+
+export interface ShoppingItem {
+  id: string
+  name: string
+  amount: number
+  unit: string
+  status: 'needed' | 'have' | 'bought'
+  custom?: boolean
+}
+
+export interface AppSettings { groceryUrl: string }
+
+export interface AppData {
+  version: 1
+  ingredients: Ingredient[]
+  recipes: Recipe[]
+  mealPlans: MealPlan[]
+  takeouts: TakeoutOption[]
+  history: MealHistory[]
+  preferences: UserPreference[]
+  shopping: ShoppingItem[]
+  settings: AppSettings
+}
