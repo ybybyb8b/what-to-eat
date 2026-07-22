@@ -10,8 +10,8 @@ export default defineConfig({
       devOptions: { enabled: false },
       includeAssets: ['icons/icon.svg', 'icons/icon-maskable.svg', 'icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
-        name: '今晚吃什么',
-        short_name: '今晚吃什么',
+        name: 'what to eat',
+        short_name: 'What to Eat',
         description: '本地优先的晚餐选择与采购清单助手',
         theme_color: '#fff7e9',
         background_color: '#fff7e9',

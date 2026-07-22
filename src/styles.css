@@ -214,6 +214,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .bought .status-check { color: white; background: var(--sage); border-color: var(--sage); }
 .status-check svg { width: 14px; stroke-width: 3; }
 .shopping-row > span { font-size: 13px; font-weight: 600; }
+.shopping-name { min-width: 0; }
+.shopping-name input { width: 100%; min-width: 0; padding: 7px 5px; border: 0; border-bottom: 1px dashed transparent; outline: 0; background: transparent; font-weight: 600; }
+.shopping-name input:focus { border-bottom-color: var(--orange); }
+.shopping-row.bought .shopping-name input { color: var(--muted); text-decoration: line-through; }
 .shopping-row label { color: var(--muted); font-size: 11px; text-align: right; }
 .shopping-row label input { width: 49px; padding: 7px 5px; border: 1px solid var(--line); border-radius: 9px; background: #fffdf9; text-align: center; }
 .delete-button { width: 32px; height: 32px; padding: 0; border: 0; display: grid; place-items: center; color: #a69f94; background: transparent; cursor: pointer; }
@@ -291,7 +295,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .switch input:checked + span:after { transform: translateX(14px); }
 .list-label { margin: 20px 0 9px; color: var(--muted); font-size: 11px; }
 .timeline { display: grid; gap: 0; }
-.timeline > div { min-height: 59px; display: grid; grid-template-columns: 24px 1fr 36px; gap: 10px; align-items: center; border-bottom: 1px solid var(--line); }
+.timeline > div { min-height: 59px; display: grid; grid-template-columns: 24px 1fr 36px 36px; gap: 6px; align-items: center; border-bottom: 1px solid var(--line); }
 .timeline > div:last-child { border-bottom: 0; }
 .timeline > div > span { width: 12px; height: 12px; margin-left: 5px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 5px var(--orange-soft); }
 .timeline strong, .timeline small { display: block; }
@@ -316,6 +320,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .settings-form .primary-button { justify-self: stretch; }
 .test-link { min-height: 44px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--orange); font-size: 11px; font-weight: 700; }
 .test-link svg { width: 15px; }
+.subsection-heading { display: flex; align-items: center; justify-content: space-between; margin: 20px 0 9px; }
+.subsection-heading h3 { margin: 0; color: var(--muted); font-size: 12px; }
+.clear-history { width: 100%; min-height: 40px; margin-bottom: 8px; border: 1px solid rgba(184,71,43,.18); border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; color: #a8442c; background: rgba(255,245,239,.5); cursor: pointer; font-size: 11px; }
+.clear-history svg { width: 15px; }
+.form-stack textarea { width: 100%; min-height: 76px; padding: 11px 12px; resize: vertical; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.56); }
+.form-stack fieldset { min-width: 0; margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 14px; }
+.form-stack legend { padding: 0 5px; color: #59554e; font-size: 11px; font-weight: 700; }
+.editor-scroll { max-height: min(72dvh,650px); padding-right: 3px; overflow-y: auto; }
+.choice-check-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+.choice-check { min-height: 34px; padding: 6px 5px; display: flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); background: rgba(255,255,255,.34); font-size: 10px; cursor: pointer; }
+.choice-check.active { color: #5f7734; border-color: rgba(120,157,63,.5); background: rgba(232,240,216,.68); font-weight: 700; }
+.choice-check input { accent-color: var(--sage); }
+.checkbox-line { min-height: 36px; display: flex !important; grid-template-columns: none; align-items: center; gap: 8px !important; }
+.checkbox-line input { width: 18px; height: 18px; accent-color: var(--sage); }
 
 /* Frosted-glass system: the latest visual direction intentionally lets the food
    background supply the color while UI surfaces stay translucent. */

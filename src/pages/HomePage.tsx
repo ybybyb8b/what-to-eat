@@ -7,7 +7,7 @@ export function HomePage() {
   const {data,loading}=useApp()
   const recent=data.history.slice().sort((a,b)=>b.eatenAt.localeCompare(a.eatenAt)).slice(0,3)
   return <div className="home-page">
-    <header className="home-header"><div><h1>今晚吃什么</h1><p>先看看今天想怎么吃</p></div><Link className="icon-button" to="/manage" aria-label="数据与设置"><Settings2/></Link></header>
+    <header className="home-header"><div><h1>what to eat</h1><p>先看看今天想怎么吃</p></div><Link className="icon-button" to="/manage" aria-label="数据与设置"><Settings2/></Link></header>
     <section className="choice-stack" aria-label="晚餐方式">
       <Link className="choice-card takeout-choice" to="/takeout"><div><span className="choice-kicker">省时间</span><h2>点外卖</h2><p>快一点吃上热乎饭</p><span className="round-arrow"><ArrowRight/></span></div><img className="food-object takeout-object" src="/assets/takeout.webp" alt="" aria-hidden="true"/></Link>
       <Link className="choice-card cook-choice" to="/ingredients"><div><span className="choice-kicker">更新鲜</span><h2>买菜做饭</h2><p>选想吃的，搭配今晚菜单</p><span className="round-arrow"><ArrowRight/></span></div><img className="food-object grocery-object" src="/assets/grocery.webp" alt="" aria-hidden="true"/></Link>

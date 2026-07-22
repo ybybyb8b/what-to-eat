@@ -1,24 +1,77 @@
-import { ArchiveRestore, ChevronRight, Clock3, Database, Download, Edit3, ExternalLink, History, Plus, Save, Settings2, Trash2, Upload } from 'lucide-react'
+import { ArchiveRestore, ChevronRight, Database, Download, ExternalLink, Save, Settings2, Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { HistoryEditor, IngredientEditor, MealPlanEditor, RecipeEditor } from '../components/DataEditors'
+import { HistorySection, IngredientsSection, MenuSection } from '../components/ManageSections'
 import { validateImport } from '../logic/importValidation'
 import { useApp } from '../state/AppContext'
-import type { AppData, IngredientCategory } from '../types'
+import type { AppData, Ingredient, MealHistory, MealPlan, Recipe } from '../types'
 
-type Section='ingredients'|'recipes'|'history'|'backup'|'settings'
+type Section = 'ingredients' | 'recipes' | 'history' | 'backup' | 'settings'
+type EditorState<T> = T | null | undefined
 
-export function ManagePage(){
-  const {data,updateData,notify}=useApp();const [section,setSection]=useState<Section>('ingredients');const fileRef=useRef<HTMLInputElement>(null)
-  const exportData=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download=`今晚吃什么-备份-${new Date().toISOString().slice(0,10)}.json`;anchor.click();URL.revokeObjectURL(url);notify('数据备份已导出')}
-  const importFile=async(file:File)=>{try{const value:unknown=JSON.parse(await file.text());if(!validateImport(value)){notify('导入失败：文件格式不符合要求');return}if(!window.confirm('导入会覆盖当前全部数据，确定继续吗？'))return;updateData(()=>value,'数据已成功恢复')}catch{notify('导入失败：无法读取 JSON 文件')}}
-  return <div className="manage-page"><header className="manage-header"><div><p className="eyebrow">本地数据中心</p><h1>我的晚餐资料</h1><p>所有偏好和记录只保存在这台设备</p></div><Settings2/></header>
-    <Link className="manage-link-card" to="/takeout"><span className="manage-icon orange">🥡</span><div><strong>管理外卖候选</strong><small>{data.takeouts.length} 个候选 · 新增、编辑或删除</small></div><ChevronRight/></Link>
-    <div className="manage-tabs" role="tablist">{([['ingredients','食材'],['recipes','菜品'],['history','记录'],['backup','备份'],['settings','设置']] as [Section,string][]).map(([id,label])=><button key={id} role="tab" aria-selected={section===id} className={section===id?'active':''} onClick={()=>setSection(id)}>{label}</button>)}</div>
-    {section==='ingredients'&&<section className="manage-section"><div className="section-heading"><div><p className="eyebrow">基础资料</p><h2>食材</h2></div><button className="small-add" onClick={()=>{const name=window.prompt('食材名称');if(!name?.trim())return;const category=(window.prompt('分类：肉蛋、蔬菜、主食、豆制品、其他','其他')||'其他') as IngredientCategory;const valid:IngredientCategory[]=['肉蛋','蔬菜','主食','豆制品','其他'];updateData((current)=>({...current,ingredients:[...current.ingredients,{id:crypto.randomUUID(),name:name.trim(),category:valid.includes(category)?category:'其他',emoji:'🥣',enabled:true}]}),'食材已添加')}}><Plus/>新增</button></div><div className="manage-list">{data.ingredients.map((item)=><div key={item.id}><span className="manage-emoji">{item.emoji}</span><div><strong>{item.name}</strong><small>{item.category}</small></div><label className="switch"><input type="checkbox" checked={item.enabled} onChange={(event)=>updateData((current)=>({...current,ingredients:current.ingredients.map((entry)=>entry.id===item.id?{...entry,enabled:event.target.checked}:entry)}))}/><span/></label><button className="icon-button compact" onClick={()=>{const name=window.prompt('新的食材名称',item.name);if(name?.trim())updateData((current)=>({...current,ingredients:current.ingredients.map((entry)=>entry.id===item.id?{...entry,name:name.trim()}:entry)}),'已更新')}} aria-label={`编辑${item.name}`}><Edit3/></button><button className="icon-button compact danger" onClick={()=>{if(window.confirm(`删除食材“${item.name}”？相关菜谱可能无法正常显示。`))updateData((current)=>({...current,ingredients:current.ingredients.filter((entry)=>entry.id!==item.id)}),'已删除')}} aria-label={`删除${item.name}`}><Trash2/></button></div>)}</div></section>}
-    {section==='recipes'&&<section className="manage-section"><div className="section-heading"><div><p className="eyebrow">菜单资料</p><h2>菜品和套餐</h2></div><span className="count-pill">{data.recipes.length} 菜 · {data.mealPlans.length} 套</span></div><h3 className="list-label">菜品</h3><div className="manage-list">{data.recipes.map((item)=><div key={item.id}><span className="manage-emoji">🍲</span><div><strong>{item.name}</strong><small>{item.minutes} 分钟 · {item.difficulty}</small></div><button className="icon-button compact" onClick={()=>{const name=window.prompt('新的菜品名称',item.name);if(name?.trim())updateData((current)=>({...current,recipes:current.recipes.map((entry)=>entry.id===item.id?{...entry,name:name.trim()}:entry)}),'菜品已更新')}}><Edit3/></button><button className="icon-button compact danger" onClick={()=>{if(window.confirm(`删除菜品“${item.name}”？`))updateData((current)=>({...current,recipes:current.recipes.filter((entry)=>entry.id!==item.id),mealPlans:current.mealPlans.map((plan)=>({...plan,recipeIds:plan.recipeIds.filter((id)=>id!==item.id)})).filter((plan)=>plan.recipeIds.length)}),'菜品已删除')}}><Trash2/></button></div>)}</div><h3 className="list-label">套餐</h3><div className="manage-list">{data.mealPlans.map((item)=><div key={item.id}><span className="manage-emoji">🍱</span><div><strong>{item.name}</strong><small>{item.recipeIds.length} 道菜 · {item.tags.join('、')}</small></div><button className="icon-button compact" onClick={()=>{const name=window.prompt('新的套餐名称',item.name);if(name?.trim())updateData((current)=>({...current,mealPlans:current.mealPlans.map((entry)=>entry.id===item.id?{...entry,name:name.trim()}:entry)}),'套餐已更新')}}><Edit3/></button><button className="icon-button compact danger" onClick={()=>{if(window.confirm(`删除套餐“${item.name}”？`))updateData((current)=>({...current,mealPlans:current.mealPlans.filter((entry)=>entry.id!==item.id)}),'套餐已删除')}}><Trash2/></button></div>)}</div></section>}
-    {section==='history'&&<section className="manage-section"><div className="section-heading"><div><p className="eyebrow">最近吃过</p><h2>用餐记录</h2></div>{data.history.length>0&&<button className="text-danger" onClick={()=>{if(window.confirm('确定清除全部用餐历史吗？此操作无法撤销。'))updateData((current)=>({...current,history:[]}),'历史记录已清除')}}>清除全部</button>}</div>{data.history.length===0?<div className="inline-empty"><History/><p>还没有记录，选定晚餐后会自动出现在这里。</p></div>:<div className="timeline">{data.history.map((item)=><div key={item.id}><span/><div><strong>{item.name}</strong><small><Clock3/>{new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'long',day:'numeric'}).format(new Date(item.eatenAt))}</small></div><button className="icon-button compact danger" onClick={()=>{if(window.confirm(`删除“${item.name}”这条记录？`))updateData((current)=>({...current,history:current.history.filter((entry)=>entry.id!==item.id)}))}}><Trash2/></button></div>)}</div>}</section>}
-    {section==='backup'&&<section className="manage-section"><div className="backup-hero"><Database/><h2>带走你的全部数据</h2><p>导出包括食材、菜谱、套餐、外卖、偏好、历史、清单和设置。</p></div><button className="action-row" onClick={exportData}><Download/><div><strong>导出全部数据</strong><small>保存为 JSON 备份文件</small></div><ChevronRight/></button><button className="action-row" onClick={()=>fileRef.current?.click()}><Upload/><div><strong>从 JSON 恢复</strong><small>导入前会再次确认</small></div><ChevronRight/></button><input ref={fileRef} hidden type="file" accept="application/json,.json" onChange={(event)=>{const file=event.target.files?.[0];if(file)void importFile(file);event.target.value=''}}/><div className="backup-note"><ArchiveRestore/><p>建议在清除浏览器数据或更换设备前先导出一份备份。</p></div></section>}
-    {section==='settings'&&<SettingsPanel data={data} updateData={updateData} notify={notify}/>}</div>
+export function ManagePage() {
+  const { data, updateData, notify } = useApp()
+  const [section, setSection] = useState<Section>('ingredients')
+  const [ingredientEditor, setIngredientEditor] = useState<EditorState<Ingredient>>()
+  const [recipeEditor, setRecipeEditor] = useState<EditorState<Recipe>>()
+  const [planEditor, setPlanEditor] = useState<EditorState<MealPlan>>()
+  const [historyEditor, setHistoryEditor] = useState<EditorState<MealHistory>>()
+
+  const saveItem = <T extends { id: string }>(key: 'ingredients' | 'recipes' | 'mealPlans' | 'history', value: T, message: string) => {
+    updateData((current) => ({ ...current, [key]: [...(current[key] as unknown as T[]).filter((item) => item.id !== value.id), value] }), message)
+  }
+
+  return <div className="manage-page">
+    <header className="manage-header"><div><p className="eyebrow">what to eat</p><h1>我的晚餐资料</h1><p>每类数据都可以新增、编辑、删除或批量恢复</p></div><Settings2 /></header>
+    <Link className="manage-link-card" to="/takeout"><span className="manage-icon orange">🥡</span><div><strong>管理外卖候选</strong><small>{data.takeouts.length} 个候选 · 新增、编辑或删除</small></div><ChevronRight /></Link>
+    <div className="manage-tabs" role="tablist">{([['ingredients', '食材'], ['recipes', '菜品套餐'], ['history', '记录'], ['backup', '上传备份'], ['settings', '设置']] as [Section, string][]).map(([id, label]) => <button key={id} role="tab" aria-selected={section === id} className={section === id ? 'active' : ''} onClick={() => setSection(id)}>{label}</button>)}</div>
+
+    {section === 'ingredients' && <IngredientsSection data={data} updateData={updateData} onEdit={setIngredientEditor} />}
+    {section === 'recipes' && <MenuSection data={data} updateData={updateData} editRecipe={setRecipeEditor} editPlan={setPlanEditor} />}
+    {section === 'history' && <HistorySection data={data} updateData={updateData} onEdit={setHistoryEditor} />}
+    {section === 'backup' && <BackupPanel data={data} updateData={updateData} notify={notify} />}
+    {section === 'settings' && <SettingsPanel data={data} updateData={updateData} notify={notify} />}
+
+    {ingredientEditor !== undefined && <IngredientEditor initial={ingredientEditor} onClose={() => setIngredientEditor(undefined)} onSave={(value) => { saveItem('ingredients', value, '食材已保存'); setIngredientEditor(undefined) }} />}
+    {recipeEditor !== undefined && <RecipeEditor initial={recipeEditor} ingredients={data.ingredients} onClose={() => setRecipeEditor(undefined)} onSave={(value) => { saveItem('recipes', value, '菜品已保存'); setRecipeEditor(undefined) }} />}
+    {planEditor !== undefined && <MealPlanEditor initial={planEditor} recipes={data.recipes} onClose={() => setPlanEditor(undefined)} onSave={(value) => { saveItem('mealPlans', value, '套餐已保存'); setPlanEditor(undefined) }} />}
+    {historyEditor !== undefined && <HistoryEditor initial={historyEditor} onClose={() => setHistoryEditor(undefined)} onSave={(value) => { saveItem('history', value, '用餐记录已保存'); setHistoryEditor(undefined) }} />}
+  </div>
 }
 
-function SettingsPanel({data,updateData,notify}:{data:AppData;updateData:(updater:(current:AppData)=>AppData,message?:string)=>void;notify:(message:string)=>void}){const [url,setUrl]=useState(data.settings.groceryUrl);return <section className="manage-section"><div className="section-heading"><div><p className="eyebrow">常用服务</p><h2>买菜平台网址</h2></div></div><form className="settings-form" onSubmit={(event)=>{event.preventDefault();if(url&& !/^https?:\/\//i.test(url)){notify('网址需要以 http:// 或 https:// 开头');return}updateData((current)=>({...current,settings:{...current.settings,groceryUrl:url.trim()}}),'设置已保存')}}><label>平台网址<input type="url" value={url} onChange={(event)=>setUrl(event.target.value)} placeholder="https://example.com"/><small>“去买菜”会先复制清单，再打开这个网址。</small></label><button className="primary-button" type="submit"><Save/>保存设置</button></form>{data.settings.groceryUrl&&<a className="test-link" target="_blank" rel="noreferrer" href={data.settings.groceryUrl}><ExternalLink/>测试打开</a>}</section>}
+function BackupPanel({ data, updateData, notify }: { data: AppData; updateData: (updater: (current: AppData) => AppData, message?: string) => void; notify: (message: string) => void }) {
+  const fileRef = useRef<HTMLInputElement>(null)
+  const exportData = () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url; anchor.download = `what-to-eat-${new Date().toISOString().slice(0, 10)}.json`; anchor.click()
+    URL.revokeObjectURL(url); notify('数据备份已导出')
+  }
+  const importFile = async (file: File) => {
+    try {
+      const value: unknown = JSON.parse(await file.text())
+      if (!validateImport(value)) return notify('上传失败：JSON 数据格式不符合要求')
+      if (window.confirm('上传恢复会覆盖当前全部数据，确定继续吗？')) updateData(() => value, '全部数据已恢复')
+    } catch { notify('上传失败：无法读取这个 JSON 文件') }
+  }
+  return <section className="manage-section">
+    <div className="backup-hero"><Database /><h2>批量上传或导出</h2><p>JSON 文件包含食材、菜品、套餐、外卖、历史、采购清单和设置。</p></div>
+    <button className="action-row" onClick={exportData}><Download /><div><strong>导出全部数据</strong><small>下载 JSON 备份文件</small></div><ChevronRight /></button>
+    <button className="action-row" onClick={() => fileRef.current?.click()}><Upload /><div><strong>上传 JSON 恢复</strong><small>选择文件后会校验并二次确认</small></div><ChevronRight /></button>
+    <input ref={fileRef} hidden type="file" accept="application/json,.json" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importFile(file); event.target.value = '' }} />
+    <div className="backup-note"><ArchiveRestore /><p>单条数据请使用对应的新增、编辑、删除界面；这里适合整批迁移。</p></div>
+  </section>
+}
+
+function SettingsPanel({ data, updateData, notify }: { data: AppData; updateData: (updater: (current: AppData) => AppData, message?: string) => void; notify: (message: string) => void }) {
+  const [url, setUrl] = useState(data.settings.groceryUrl)
+  return <section className="manage-section"><div className="section-heading"><div><p className="eyebrow">常用服务</p><h2>买菜平台网址</h2></div></div>
+    <form className="settings-form" onSubmit={(event) => { event.preventDefault(); if (url && !/^https?:\/\//i.test(url)) return notify('网址需要以 http:// 或 https:// 开头'); updateData((current) => ({ ...current, settings: { ...current.settings, groceryUrl: url.trim() } }), '设置已保存') }}>
+      <label>平台网址<input type="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://example.com" /><small>“去买菜”会先复制清单，再打开这个网址。</small></label>
+      <button className="primary-button" type="submit"><Save />保存修改</button>
+    </form>
+    {data.settings.groceryUrl && <a className="test-link" target="_blank" rel="noreferrer" href={data.settings.groceryUrl}><ExternalLink />测试打开</a>}
+  </section>
+}
