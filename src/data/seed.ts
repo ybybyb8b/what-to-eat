@@ -1,6 +1,7 @@
 import type { AppData, Ingredient, MealPlan, Recipe, TakeoutOption } from '../types'
 
 export const pantryNames = ['油', '盐', '生抽', '醋', '白糖']
+export const defaultTakeoutCategories = ['米饭', '面食', '快餐', '小吃', '清淡', '其他']
 
 export const seedIngredients: Ingredient[] = [
   ['chicken-leg','鸡腿','肉蛋','🍗'],['chicken-breast','鸡胸肉','肉蛋','🐔'],['pork','猪肉','肉蛋','🥩'],['beef','牛肉','肉蛋','🥩'],['egg','鸡蛋','肉蛋','🥚'],['shrimp','虾','肉蛋','🦐'],
@@ -34,4 +35,4 @@ export const seedTakeouts: TakeoutOption[] = [
   ['t1','照烧鸡腿饭','米饭',28,35,'#e8a35d'],['t2','番茄牛腩饭','米饭',34,40,'#d97755'],['t3','红烧牛肉面','面食',30,32,'#c97a4c'],['t4','鲜虾云吞面','面食',26,30,'#dc9a6f'],['t5','汉堡套餐','快餐',32,25,'#e1a255'],['t6','生煎小笼','小吃',24,28,'#d7a978'],['t7','菌菇鸡汤','清淡',29,38,'#87a66d'],['t8','杂粮轻食碗','清淡',31,25,'#799f70'],['t9','麻辣烫','其他',27,35,'#d85e3f']
 ].map(([id,name,category,price,minutes,color]) => ({id:String(id),name:String(name),category:category as TakeoutOption['category'],price:Number(price),minutes:Number(minutes),color:String(color)}))
 
-export const seedData: AppData = { version:1, ingredients:seedIngredients, recipes:seedRecipes, mealPlans:seedMealPlans, takeouts:seedTakeouts, history:[], preferences:[], shopping:[], settings:{groceryUrl:''} }
+export const seedData: AppData = { version:1, ingredients:seedIngredients, recipes:seedRecipes, mealPlans:seedMealPlans, takeouts:seedTakeouts, history:[], preferences:[], shopping:[], settings:{groceryUrl:'',takeoutCategories:defaultTakeoutCategories} }

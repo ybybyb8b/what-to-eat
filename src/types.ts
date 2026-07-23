@@ -1,7 +1,7 @@
 export type IngredientCategory = '肉蛋' | '蔬菜' | '主食' | '豆制品' | '其他'
 export type Difficulty = '简单' | '中等' | '进阶'
 export type RecipeTag = '省时间' | '少洗锅' | '清淡' | '一锅完成'
-export type TakeoutCategory = '米饭' | '面食' | '快餐' | '小吃' | '清淡' | '其他'
+export type TakeoutCategory = string
 
 export interface Portion { ingredientId: string; amount: number; unit: string }
 export interface Substitution { ingredientId: string; alternatives: string[] }
@@ -74,7 +74,10 @@ export interface ShoppingItem {
   custom?: boolean
 }
 
-export interface AppSettings { groceryUrl: string }
+export interface AppSettings {
+  groceryUrl: string
+  takeoutCategories: string[]
+}
 
 export interface AppData {
   version: 1

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { HistoryEditor, IngredientEditor, MealPlanEditor, RecipeEditor } from '../components/DataEditors'
 import { HistorySection, IngredientsSection, MenuSection } from '../components/ManageSections'
 import { validateImport } from '../logic/importValidation'
+import { normalizeData } from '../data/db'
 import { useApp } from '../state/AppContext'
 import type { AppData, Ingredient, MealHistory, MealPlan, Recipe } from '../types'
 
@@ -53,7 +54,7 @@ function BackupPanel({ data, updateData, notify }: { data: AppData; updateData: 
     try {
       const value: unknown = JSON.parse(await file.text())
       if (!validateImport(value)) return notify('上传失败：JSON 数据格式不符合要求')
-      if (window.confirm('上传恢复会覆盖当前全部数据，确定继续吗？')) updateData(() => value, '全部数据已恢复')
+      if (window.confirm('上传恢复会覆盖当前全部数据，确定继续吗？')) updateData(() => normalizeData(value), '全部数据已恢复')
     } catch { notify('上传失败：无法读取这个 JSON 文件') }
   }
   return <section className="manage-section">
