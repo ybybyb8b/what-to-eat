@@ -12,11 +12,12 @@ const navItems = [
 export function AppShell() {
   const {storageError,toast} = useApp()
   const location=useLocation()
-  const hideNav=['/ingredients','/recommendations','/plan','/shopping'].some((path)=>location.pathname.startsWith(path))
+  const hasStickyAction=['/ingredients','/plan','/shopping'].some((path)=>location.pathname.startsWith(path))
+  const planSection=['/recommendations','/plan','/shopping'].some((path)=>location.pathname.startsWith(path))
   return <div className="app-frame">
     {storageError && <div className="storage-alert" role="alert">{storageError}</div>}
-    <main className={hideNav?'page no-nav':'page'}><Outlet/></main>
-    {!hideNav && <nav className="bottom-nav" aria-label="主要导航">{navItems.map(({to,label,icon:Icon})=><NavLink key={to} to={to} end={to==='/'}><Icon aria-hidden="true"/><span>{label}</span></NavLink>)}</nav>}
+    <main className={hasStickyAction?'page has-sticky-action':'page'}><Outlet/></main>
+    <nav className="bottom-nav" aria-label="主要导航">{navItems.map(({to,label,icon:Icon})=><NavLink className={({isActive})=>isActive||(to==='/recommendations'&&planSection)?'active':''} key={to} to={to} end={to==='/'}><Icon aria-hidden="true"/><span>{label}</span></NavLink>)}</nav>
     {toast && <div className="toast" role="status">{toast}</div>}
   </div>
 }

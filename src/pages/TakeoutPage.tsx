@@ -1,4 +1,4 @@
-import { Check, Clock3, Edit3, Heart, Plus, Search, ThumbsDown, Trash2, UtensilsCrossed } from 'lucide-react'
+import { Check, Clock3, Edit3, Heart, Plus, Search, Tags, ThumbsDown, Trash2, UtensilsCrossed } from 'lucide-react'
 import { useMemo, useState, type CSSProperties, type FormEvent } from 'react'
 import { ImageField } from '../components/ImageField'
 import { Modal, PageHeader, SearchField } from '../components/UI'
@@ -6,8 +6,8 @@ import { useApp } from '../state/AppContext'
 import type { TakeoutCategory, TakeoutOption } from '../types'
 import { createId } from '../utils/id'
 
-const categories: ['全部', ...TakeoutCategory[]] = ['全部', '米饭', '面食', '快餐', '小吃', '清淡', '其他']
 type EditorState = { mode: 'new' } | { mode: 'edit'; item: TakeoutOption }
+type CategoryRow = { id: string; original?: string; name: string }
 
 function takeoutScore(item: TakeoutOption, favorite: boolean, rejected: number) {
   const age = item.lastEatenAt ? (Date.now() - new Date(item.lastEatenAt).getTime()) / 86_400_000 : 99
@@ -16,9 +16,12 @@ function takeoutScore(item: TakeoutOption, favorite: boolean, rejected: number) 
 
 export function TakeoutPage() {
   const { data, updateData, setPreference, addHistory, notify } = useApp()
-  const [category, setCategory] = useState<(typeof categories)[number]>('全部')
+  const [category, setCategory] = useState('全部')
   const [search, setSearch] = useState('')
   const [editor, setEditor] = useState<EditorState | null>(null)
+  const [categoryEditor, setCategoryEditor] = useState(false)
+  const takeoutCategories = data.settings.takeoutCategories ?? []
+  const categories = ['全部', ...takeoutCategories]
 
   const sorted = useMemo(() => data.takeouts
     .filter((item) => (category === '全部' || item.category === category) && item.name.includes(search))
@@ -36,6 +39,17 @@ export function TakeoutPage() {
     setEditor(null)
   }
   const openNew = () => setEditor({ mode: 'new' })
+  const saveCategories = (rows: CategoryRow[]) => {
+    const names = rows.map((row) => row.name.trim())
+    const renameMap = new Map(rows.filter((row) => row.original).map((row) => [row.original as string, row.name.trim()]))
+    updateData((current) => ({
+      ...current,
+      takeouts: current.takeouts.map((item) => ({ ...item, category: renameMap.get(item.category) ?? item.category })),
+      settings: { ...current.settings, takeoutCategories: names }
+    }), '外卖分类已保存')
+    setCategory('全部')
+    setCategoryEditor(false)
+  }
 
   return <div className="sub-page takeout-page">
     <PageHeader
@@ -47,7 +61,10 @@ export function TakeoutPage() {
     <div className="category-tabs scroll-tabs">{categories.map((item) => <button type="button" className={category === item ? 'active' : ''} onClick={() => setCategory(item)} key={item}>{item}</button>)}</div>
     <div className="takeout-create-row">
       <span>共 {data.takeouts.length} 个候选</span>
-      <button type="button" className="small-add" onClick={openNew}><Plus />新增候选</button>
+      <div>
+        <button type="button" className="category-manage-button" onClick={() => setCategoryEditor(true)}><Tags />管理分类</button>
+        <button type="button" className="small-add" onClick={openNew}><Plus />新增候选</button>
+      </div>
     </div>
 
     {sorted.length === 0 && <div className="inline-empty"><Search /><p>没有找到候选，换个关键词或新增一项。</p></div>}
@@ -84,26 +101,35 @@ export function TakeoutPage() {
     {editor && <TakeoutEditor
       key={editor.mode === 'edit' ? editor.item.id : 'new-takeout'}
       initial={editor.mode === 'edit' ? editor.item : null}
+      categories={takeoutCategories}
       onClose={() => setEditor(null)}
       onSave={save}
+    />}
+    {categoryEditor && <CategoryManager
+      categories={takeoutCategories}
+      takeouts={data.takeouts}
+      onClose={() => setCategoryEditor(false)}
+      onSave={saveCategories}
     />}
   </div>
 }
 
-function TakeoutEditor({ initial, onClose, onSave }: {
+function TakeoutEditor({ initial, categories, onClose, onSave }: {
   initial: TakeoutOption | null
+  categories: string[]
   onClose: () => void
   onSave: (value: TakeoutOption) => void
 }) {
+  const categoryOptions = initial?.category && !categories.includes(initial.category) ? [initial.category, ...categories] : categories
   const [name, setName] = useState(initial?.name ?? '')
-  const [category, setCategory] = useState<TakeoutCategory>(initial?.category ?? '米饭')
+  const [category, setCategory] = useState<TakeoutCategory>(initial?.category ?? categoryOptions[0] ?? '')
   const [price, setPrice] = useState(initial?.price ?? 25)
   const [minutes, setMinutes] = useState(initial?.minutes ?? 30)
   const [image, setImage] = useState(initial?.image)
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    if (!name.trim()) return
+    if (!name.trim() || !category) return
     onSave({
       id: initial?.id ?? createId(),
       name: name.trim(),
@@ -120,12 +146,55 @@ function TakeoutEditor({ initial, onClose, onSave }: {
     <form className="form-stack editor-scroll" onSubmit={submit}>
       <label>名称<input required value={name} onChange={(event) => setName(event.target.value)} placeholder="例如：鸡腿饭" /></label>
       <ImageField image={image} onChange={setImage} label="外卖图片（可选）" />
-      <label>分类<select value={category} onChange={(event) => setCategory(event.target.value as TakeoutCategory)}>{categories.slice(1).map((item) => <option key={item}>{item}</option>)}</select></label>
+      <label>分类<select required value={category} onChange={(event) => setCategory(event.target.value as TakeoutCategory)}>{categoryOptions.map((item) => <option key={item}>{item}</option>)}</select></label>
       <div className="field-row">
         <label>大致价格<input type="number" min="0" inputMode="decimal" value={price} onChange={(event) => setPrice(Number(event.target.value))} /></label>
         <label>预计分钟<input type="number" min="1" inputMode="numeric" value={minutes} onChange={(event) => setMinutes(Number(event.target.value))} /></label>
       </div>
       <button className="primary-button" type="submit">保存候选</button>
+    </form>
+  </Modal>
+}
+
+function CategoryManager({ categories, takeouts, onClose, onSave }: {
+  categories: string[]
+  takeouts: TakeoutOption[]
+  onClose: () => void
+  onSave: (rows: CategoryRow[]) => void
+}) {
+  const [rows, setRows] = useState<CategoryRow[]>(categories.map((name) => ({ id: createId(), original: name, name })))
+  const [error, setError] = useState('')
+  const usedCount = (row: CategoryRow) => row.original ? takeouts.filter((item) => item.category === row.original).length : 0
+  const remove = (id: string) => setRows((current) => current.filter((row) => row.id !== id))
+  const submit = (event: FormEvent) => {
+    event.preventDefault()
+    const names = rows.map((row) => row.name.trim())
+    if (!names.length) return setError('至少保留一个分类')
+    if (names.some((name) => !name)) return setError('分类名称不能为空')
+    if (new Set(names).size !== names.length) return setError('分类名称不能重复')
+    onSave(rows.map((row) => ({ ...row, name: row.name.trim() })))
+  }
+
+  return <Modal title="管理外卖分类" onClose={onClose}>
+    <form className="form-stack" onSubmit={submit}>
+      <p className="form-note">重命名会同步更新已有候选；仍有候选的分类不能直接删除。</p>
+      <div className="category-editor-list">{rows.map((row) => {
+        const count = usedCount(row)
+        return <div key={row.id}>
+          <label>
+            <span className="sr-only">分类名称</span>
+            <input value={row.name} onChange={(event) => {
+              setRows((current) => current.map((item) => item.id === row.id ? { ...item, name: event.target.value } : item))
+              setError('')
+            }} />
+          </label>
+          <small>{count ? `${count} 个候选` : '未使用'}</small>
+          <button type="button" className="delete-button" disabled={count > 0} onClick={() => remove(row.id)} aria-label={`删除分类${row.name}`} title={count ? '请先修改该分类下的候选' : '删除分类'}><Trash2 /></button>
+        </div>
+      })}</div>
+      <button type="button" className="secondary-button category-add-button" onClick={() => setRows((current) => [...current, { id: createId(), name: '' }])}><Plus />添加分类</button>
+      {error && <p className="form-error" role="alert">{error}</p>}
+      <button className="primary-button" type="submit">保存分类</button>
     </form>
   </Modal>
 }
