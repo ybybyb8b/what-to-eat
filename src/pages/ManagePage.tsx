@@ -1,4 +1,4 @@
-import { ArchiveRestore, ChevronRight, Database, Download, ExternalLink, Save, Settings2, Upload } from 'lucide-react'
+import { ArchiveRestore, ChevronRight, Database, Download, ExternalLink, Save, Settings2, Upload, UtensilsCrossed } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { HistoryEditor, IngredientEditor, MealPlanEditor, RecipeEditor } from '../components/DataEditors'
@@ -24,7 +24,7 @@ export function ManagePage() {
 
   return <div className="manage-page">
     <header className="manage-header"><div><p className="eyebrow">what to eat</p><h1>我的晚餐资料</h1><p>每类数据都可以新增、编辑、删除或批量恢复</p></div><Settings2 /></header>
-    <Link className="manage-link-card" to="/takeout"><span className="manage-icon orange">🥡</span><div><strong>管理外卖候选</strong><small>{data.takeouts.length} 个候选 · 新增、编辑或删除</small></div><ChevronRight /></Link>
+    <Link className="manage-link-card" to="/takeout"><span className="manage-icon orange"><UtensilsCrossed /></span><div><strong>管理外卖候选</strong><small>{data.takeouts.length} 个候选 · 新增、编辑或删除</small></div><ChevronRight /></Link>
     <div className="manage-tabs" role="tablist">{([['ingredients', '食材'], ['recipes', '菜品套餐'], ['history', '记录'], ['backup', '上传备份'], ['settings', '设置']] as [Section, string][]).map(([id, label]) => <button key={id} role="tab" aria-selected={section === id} className={section === id ? 'active' : ''} onClick={() => setSection(id)}>{label}</button>)}</div>
 
     {section === 'ingredients' && <IngredientsSection data={data} updateData={updateData} onEdit={setIngredientEditor} />}
