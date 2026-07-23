@@ -11,6 +11,7 @@ export interface Ingredient {
   name: string
   category: IngredientCategory
   emoji: string
+  image?: string
   enabled: boolean
 }
 
@@ -27,6 +28,7 @@ export interface Recipe {
   difficulty: Difficulty
   tags: RecipeTag[]
   color: string
+  image?: string
 }
 
 export interface MealPlan {
@@ -35,6 +37,7 @@ export interface MealPlan {
   recipeIds: string[]
   reason: string
   tags: RecipeTag[]
+  image?: string
 }
 
 export interface TakeoutOption {
@@ -45,6 +48,7 @@ export interface TakeoutOption {
   minutes: number
   lastEatenAt?: string
   color: string
+  image?: string
 }
 
 export interface MealHistory {

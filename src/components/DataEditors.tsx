@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react'
+import { createId } from '../utils/id'
 import { Modal } from './UI'
+import { ImageField } from './ImageField'
 import type { Difficulty, Ingredient, IngredientCategory, MealHistory, MealPlan, Recipe, RecipeTag } from '../types'
 
 const ingredientCategories: IngredientCategory[] = ['肉蛋', '蔬菜', '主食', '豆制品', '其他']
@@ -14,22 +16,20 @@ interface EditorProps<T> {
 export function IngredientEditor({ initial, onClose, onSave }: EditorProps<Ingredient>) {
   const [name, setName] = useState(initial?.name ?? '')
   const [category, setCategory] = useState<IngredientCategory>(initial?.category ?? '其他')
-  const [emoji, setEmoji] = useState(initial?.emoji ?? '🥣')
+  const [image, setImage] = useState(initial?.image)
   const [enabled, setEnabled] = useState(initial?.enabled ?? true)
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
     if (!name.trim()) return
-    onSave({ id: initial?.id ?? crypto.randomUUID(), name: name.trim(), category, emoji: emoji.trim() || '🥣', enabled })
+    onSave({ id: initial?.id ?? createId(), name: name.trim(), category, emoji: initial?.emoji ?? '', image, enabled })
   }
 
   return <Modal title={initial ? '编辑食材' : '新增食材'} onClose={onClose}>
     <form className="form-stack" onSubmit={submit}>
       <label>食材名称<input required value={name} onChange={(event) => setName(event.target.value)} placeholder="例如：西兰花" /></label>
-      <div className="field-row">
-        <label>分类<select value={category} onChange={(event) => setCategory(event.target.value as IngredientCategory)}>{ingredientCategories.map((item) => <option key={item}>{item}</option>)}</select></label>
-        <label>图标<input value={emoji} onChange={(event) => setEmoji(event.target.value)} maxLength={4} /></label>
-      </div>
+      <label>分类<select value={category} onChange={(event) => setCategory(event.target.value as IngredientCategory)}>{ingredientCategories.map((item) => <option key={item}>{item}</option>)}</select></label>
+      <ImageField image={image} onChange={setImage} label="食材图片（可选）" />
       <label className="checkbox-line"><input type="checkbox" checked={enabled} onChange={(event) => setEnabled(event.target.checked)} />在食材选择页显示</label>
       <button className="primary-button" type="submit">保存食材</button>
     </form>
@@ -51,23 +51,25 @@ export function RecipeEditor({ initial, ingredients, onClose, onSave }: EditorPr
   const [optionalIds, setOptionalIds] = useState(initial?.optional.map((item) => item.ingredientId) ?? [])
   const [tags, setTags] = useState<RecipeTag[]>(initial?.tags ?? [])
   const [steps, setSteps] = useState(initial?.steps.join('\n') ?? '')
+  const [image, setImage] = useState(initial?.image)
 
   const portions = (ids: string[], existing: Recipe['required']) => ids.map((id) => existing.find((item) => item.ingredientId === id) ?? { ingredientId: id, amount: 1, unit: '份' })
   const submit = (event: FormEvent) => {
     event.preventDefault()
     if (!name.trim() || !requiredIds.length) return
     onSave({
-      id: initial?.id ?? crypto.randomUUID(), name: name.trim(), description: description.trim(),
+      id: initial?.id ?? createId(), name: name.trim(), description: description.trim(),
       required: portions(requiredIds, initial?.required ?? []), optional: portions(optionalIds, initial?.optional ?? []),
       substitutions: initial?.substitutions ?? [], pantry: initial?.pantry ?? [],
       steps: steps.split('\n').map((item) => item.trim()).filter(Boolean), minutes, difficulty, tags,
-      color: initial?.color ?? '#e99458'
+      color: initial?.color ?? '#e99458', image
     })
   }
 
   return <Modal title={initial ? '编辑菜品' : '新增菜品'} onClose={onClose}>
     <form className="form-stack editor-scroll" onSubmit={submit}>
       <label>菜品名称<input required value={name} onChange={(event) => setName(event.target.value)} placeholder="例如：青椒肉丝" /></label>
+      <ImageField image={image} onChange={setImage} label="菜品图片（可选）" />
       <label>简短介绍<textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="口味和推荐理由" /></label>
       <div className="field-row">
         <label>预计分钟<input type="number" min="1" value={minutes} onChange={(event) => setMinutes(Number(event.target.value))} /></label>
@@ -87,14 +89,16 @@ export function MealPlanEditor({ initial, recipes, onClose, onSave }: EditorProp
   const [reason, setReason] = useState(initial?.reason ?? '')
   const [recipeIds, setRecipeIds] = useState(initial?.recipeIds ?? [])
   const [tags, setTags] = useState<RecipeTag[]>(initial?.tags ?? [])
+  const [image, setImage] = useState(initial?.image)
   const submit = (event: FormEvent) => {
     event.preventDefault()
     if (!name.trim() || !recipeIds.length) return
-    onSave({ id: initial?.id ?? crypto.randomUUID(), name: name.trim(), reason: reason.trim(), recipeIds, tags })
+    onSave({ id: initial?.id ?? createId(), name: name.trim(), reason: reason.trim(), recipeIds, tags, image })
   }
   return <Modal title={initial ? '编辑套餐' : '新增套餐'} onClose={onClose}>
     <form className="form-stack editor-scroll" onSubmit={submit}>
       <label>套餐名称<input required value={name} onChange={(event) => setName(event.target.value)} placeholder="例如：家常两菜一汤" /></label>
+      <ImageField image={image} onChange={setImage} label="套餐封面（可选）" />
       <label>推荐理由<textarea value={reason} onChange={(event) => setReason(event.target.value)} /></label>
       <fieldset><legend>包含菜品（至少选一道）</legend><ChoiceGrid items={recipes} selected={recipeIds} onChange={setRecipeIds} /></fieldset>
       <fieldset><legend>标签</legend><ChoiceGrid items={recipeTags.map((tag) => ({ id: tag, name: tag }))} selected={tags} onChange={(ids) => setTags(ids as RecipeTag[])} /></fieldset>
@@ -110,7 +114,7 @@ export function HistoryEditor({ initial, onClose, onSave }: EditorProps<MealHist
   const submit = (event: FormEvent) => {
     event.preventDefault()
     if (!name.trim()) return
-    const id = initial?.id ?? crypto.randomUUID()
+    const id = initial?.id ?? createId()
     onSave({ id, itemId: initial?.itemId ?? `manual-${id}`, name: name.trim(), kind, eatenAt: new Date(`${date}T12:00:00`).toISOString() })
   }
   return <Modal title={initial ? '编辑用餐记录' : '新增用餐记录'} onClose={onClose}>

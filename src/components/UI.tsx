@@ -1,4 +1,5 @@
 import { ArrowLeft, Search, X } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
 
@@ -13,4 +14,14 @@ export function SearchField({value,onChange,placeholder='搜索'}:{value:string;
 
 export function EmptyState({icon='🍽️',title,description,action}:{icon?:string;title:string;description:string;action?:ReactNode}) {return <div className="empty-state"><span className="empty-icon" aria-hidden="true">{icon}</span><h2>{title}</h2><p>{description}</p>{action}</div>}
 
-export function Modal({title,children,onClose}:{title:string;children:ReactNode;onClose:()=>void}) {return <div className="modal-backdrop" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)onClose()}}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header><h2 id="modal-title">{title}</h2><button className="icon-button" onClick={onClose} aria-label="关闭"><X/></button></header>{children}</section></div>}
+export function Modal({title,children,onClose}:{title:string;children:ReactNode;onClose:()=>void}) {
+  return createPortal(
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)onClose()}}>
+      <section className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <header><h2 id="modal-title">{title}</h2><button type="button" className="icon-button" onClick={onClose} aria-label="关闭"><X/></button></header>
+        {children}
+      </section>
+    </div>,
+    document.body
+  )
+}
