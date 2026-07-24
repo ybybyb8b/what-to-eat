@@ -1,5 +1,8 @@
+@import './fonts/lxgwwenkai-regular.css';
+@import './fonts/lxgwwenkai-bold.css';
+
 :root {
-  font-family: "SF Pro Display", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  font-family: "LXGW WenKai", "PingFang SC", system-ui, sans-serif;
   color: #282722;
   background: #fef9f0;
   font-synthesis: none;
@@ -364,16 +367,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .clear-history { width: 100%; min-height: 40px; margin-bottom: 8px; border: 1px solid rgba(184,71,43,.18); border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; color: #a8442c; background: rgba(255,245,239,.5); cursor: pointer; font-size: 11px; }
 .clear-history svg { width: 15px; }
 .form-stack textarea { width: 100%; min-height: 76px; padding: 11px 12px; resize: vertical; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.56); }
-.form-stack fieldset { min-width: 0; margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 14px; }
-.form-stack legend { padding: 0 5px; color: #59554e; font-size: 11px; font-weight: 700; }
+.form-stack fieldset { min-width: 0; margin: 0; padding: 13px; border: 0; border-radius: 18px; background: rgba(255,255,255,.2); box-shadow: 0 9px 24px rgba(72,52,29,.055); }
+.form-stack legend { float: left; width: 100%; margin: 0 0 10px; padding: 0 2px; color: #59554e; font-size: 11px; font-weight: 700; }
+.form-stack fieldset .choice-check-grid { clear: both; }
 .editor-scroll { max-height: min(72dvh,650px); padding-right: 3px; overflow-y: auto; }
 .choice-check-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
-.form-stack .choice-check { min-height: 38px; padding: 6px 9px; display: flex; align-items: center; gap: 7px; border: 1px solid rgba(92,75,52,.11); border-radius: 999px; color: var(--muted); background: rgba(255,255,255,.34); font-size: 10px; font-weight: 500; cursor: pointer; }
-.choice-check.active { color: #5f7734; border-color: rgba(120,157,63,.46); background: rgba(232,240,216,.68); font-weight: 700; }
+.form-stack .choice-check { min-height: 38px; padding: 6px 9px; display: flex; align-items: center; gap: 7px; border: 0; border-radius: 999px; color: var(--muted); background: rgba(255,255,255,.42); box-shadow: 0 5px 14px rgba(70,49,24,.045); font-size: 10px; font-weight: 500; cursor: pointer; }
+.choice-check.active { color: #5f7734; background: rgba(226,238,198,.82); box-shadow: 0 7px 16px rgba(102,128,55,.11); font-weight: 700; }
 .choice-check:has(input:focus-visible) { outline: 3px solid rgba(239,91,42,.28); outline-offset: 2px; }
-.choice-check-indicator { width: 17px; height: 17px; flex: 0 0 auto; display: grid; place-items: center; border: 1.5px solid rgba(105,98,86,.42); border-radius: 50%; background: rgba(255,255,255,.55); }
-.choice-check.active .choice-check-indicator { color: white; border-color: var(--sage); background: var(--sage); }
-.choice-check-indicator svg { width: 11px; stroke-width: 3; }
+.choice-check-indicator { width: 17px; height: 17px; flex: 0 0 auto; display: grid; place-items: center; border: 0; border-radius: 50%; background: rgba(105,98,86,.16); line-height: 0; }
+.choice-check.active .choice-check-indicator { color: white; background: var(--sage); }
+.choice-check-indicator svg { width: 11px; height: 11px; display: block; transform: translateY(-1px); stroke-width: 3; }
 .checkbox-line { min-height: 36px; display: flex !important; grid-template-columns: none; align-items: center; gap: 8px !important; }
 .checkbox-line input { width: 18px; height: 18px; accent-color: var(--sage); }
 
