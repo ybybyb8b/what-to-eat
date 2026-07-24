@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Check } from 'lucide-react'
 import { createId } from '../utils/id'
 import { Modal } from './UI'
 import { ImageField } from './ImageField'
@@ -38,7 +39,9 @@ export function IngredientEditor({ initial, onClose, onSave }: EditorProps<Ingre
 
 function ChoiceGrid({ items, selected, onChange }: { items: { id: string; name: string }[]; selected: string[]; onChange: (ids: string[]) => void }) {
   return <div className="choice-check-grid">{items.map((item) => <label className={selected.includes(item.id) ? 'choice-check active' : 'choice-check'} key={item.id}>
-    <input type="checkbox" checked={selected.includes(item.id)} onChange={() => onChange(selected.includes(item.id) ? selected.filter((id) => id !== item.id) : [...selected, item.id])} />{item.name}
+    <input className="sr-only" type="checkbox" checked={selected.includes(item.id)} onChange={() => onChange(selected.includes(item.id) ? selected.filter((id) => id !== item.id) : [...selected, item.id])} />
+    <span className="choice-check-indicator" aria-hidden="true">{selected.includes(item.id) && <Check />}</span>
+    <span>{item.name}</span>
   </label>)}</div>
 }
 
