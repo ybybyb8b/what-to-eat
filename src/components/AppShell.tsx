@@ -12,7 +12,7 @@ const navItems = [
 export function AppShell() {
   const {storageError,toast} = useApp()
   const location=useLocation()
-  const hasStickyAction=['/ingredients','/plan','/shopping'].some((path)=>location.pathname.startsWith(path))
+  const hasStickyAction=['/ingredients','/pick-dishes','/plan','/shopping'].some((path)=>location.pathname.startsWith(path))
   const planSection=['/recommendations','/plan','/shopping'].some((path)=>location.pathname.startsWith(path))
   return <div className="app-frame">
     {storageError && <div className="storage-alert" role="alert">{storageError}</div>}

@@ -3,10 +3,11 @@ import { Check } from 'lucide-react'
 import { createId } from '../utils/id'
 import { Modal } from './UI'
 import { ImageField } from './ImageField'
-import type { Difficulty, Ingredient, IngredientCategory, MealHistory, MealPlan, Recipe, RecipeTag } from '../types'
+import type { Difficulty, Ingredient, IngredientCategory, MealHistory, MealPlan, PickDishCategory, PickDishItem, Recipe, RecipeTag } from '../types'
 
 const ingredientCategories: IngredientCategory[] = ['肉蛋', '蔬菜', '主食', '豆制品', '其他']
 const recipeTags: RecipeTag[] = ['省时间', '少洗锅', '清淡', '一锅完成']
+const pickDishCategories: PickDishCategory[] = ['火锅', '水煮菜', '卤菜']
 
 interface EditorProps<T> {
   initial: T | null
@@ -33,6 +34,27 @@ export function IngredientEditor({ initial, onClose, onSave }: EditorProps<Ingre
       <ImageField image={image} onChange={setImage} label="食材图片（可选）" />
       <label className="checkbox-line"><input type="checkbox" checked={enabled} onChange={(event) => setEnabled(event.target.checked)} />在食材选择页显示</label>
       <button className="primary-button" type="submit">保存食材</button>
+    </form>
+  </Modal>
+}
+
+export function PickDishEditor({ initial, onClose, onSave }: EditorProps<PickDishItem>) {
+  const [name, setName] = useState(initial?.name ?? '')
+  const [unit, setUnit] = useState(initial?.unit ?? '份')
+  const [categories, setCategories] = useState<PickDishCategory[]>(initial?.categories ?? ['火锅'])
+  const [enabled, setEnabled] = useState(initial?.enabled ?? true)
+  const submit = (event: FormEvent) => {
+    event.preventDefault()
+    if (!name.trim() || !unit.trim() || !categories.length) return
+    onSave({ id: initial?.id ?? createId(), name: name.trim(), unit: unit.trim(), categories, enabled })
+  }
+  return <Modal title={initial ? '编辑自选菜' : '新增自选菜'} onClose={onClose}>
+    <form className="form-stack" onSubmit={submit}>
+      <label>名称<input required value={name} onChange={(event) => setName(event.target.value)} placeholder="例如：肥牛卷" /></label>
+      <label>采购单位<input required value={unit} onChange={(event) => setUnit(event.target.value)} placeholder="例如：盒、份、袋" /></label>
+      <fieldset><legend>适合的做法（可多选）</legend><ChoiceGrid items={pickDishCategories.map((item) => ({ id: item, name: item }))} selected={categories} onChange={(ids) => setCategories(ids as PickDishCategory[])} /></fieldset>
+      <label className="checkbox-line"><input type="checkbox" checked={enabled} onChange={(event) => setEnabled(event.target.checked)} />在自选菜页面显示</label>
+      <button className="primary-button" type="submit" disabled={!categories.length}>保存自选菜</button>
     </form>
   </Modal>
 }

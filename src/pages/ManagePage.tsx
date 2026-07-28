@@ -1,40 +1,43 @@
 import { ArchiveRestore, ChevronRight, Database, Download, ExternalLink, Save, Settings2, Upload, UtensilsCrossed } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { HistoryEditor, IngredientEditor, MealPlanEditor, RecipeEditor } from '../components/DataEditors'
-import { HistorySection, IngredientsSection, MenuSection } from '../components/ManageSections'
+import { HistoryEditor, IngredientEditor, MealPlanEditor, PickDishEditor, RecipeEditor } from '../components/DataEditors'
+import { HistorySection, IngredientsSection, MenuSection, PickDishSection } from '../components/ManageSections'
 import { validateImport } from '../logic/importValidation'
 import { normalizeData } from '../data/db'
 import { useApp } from '../state/AppContext'
-import type { AppData, Ingredient, MealHistory, MealPlan, Recipe } from '../types'
+import type { AppData, Ingredient, MealHistory, MealPlan, PickDishItem, Recipe } from '../types'
 
-type Section = 'ingredients' | 'recipes' | 'history' | 'backup' | 'settings'
+type Section = 'ingredients' | 'pickDishes' | 'recipes' | 'history' | 'backup' | 'settings'
 type EditorState<T> = T | null | undefined
 
 export function ManagePage() {
   const { data, updateData, notify } = useApp()
   const [section, setSection] = useState<Section>('ingredients')
   const [ingredientEditor, setIngredientEditor] = useState<EditorState<Ingredient>>()
+  const [pickDishEditor, setPickDishEditor] = useState<EditorState<PickDishItem>>()
   const [recipeEditor, setRecipeEditor] = useState<EditorState<Recipe>>()
   const [planEditor, setPlanEditor] = useState<EditorState<MealPlan>>()
   const [historyEditor, setHistoryEditor] = useState<EditorState<MealHistory>>()
 
-  const saveItem = <T extends { id: string }>(key: 'ingredients' | 'recipes' | 'mealPlans' | 'history', value: T, message: string) => {
+  const saveItem = <T extends { id: string }>(key: 'ingredients' | 'pickDishItems' | 'recipes' | 'mealPlans' | 'history', value: T, message: string) => {
     updateData((current) => ({ ...current, [key]: [...(current[key] as unknown as T[]).filter((item) => item.id !== value.id), value] }), message)
   }
 
   return <div className="manage-page">
     <header className="manage-header"><div><p className="eyebrow">what to eat</p><h1>我的晚餐资料</h1><p>每类数据都可以新增、编辑、删除或批量恢复</p></div><Settings2 /></header>
     <Link className="manage-link-card" to="/takeout"><span className="manage-icon orange"><UtensilsCrossed /></span><div><strong>管理外卖候选</strong><small>{data.takeouts.length} 个候选 · 新增、编辑或删除</small></div><ChevronRight /></Link>
-    <div className="manage-tabs" role="tablist">{([['ingredients', '食材'], ['recipes', '菜品套餐'], ['history', '记录'], ['backup', '上传备份'], ['settings', '设置']] as [Section, string][]).map(([id, label]) => <button key={id} role="tab" aria-selected={section === id} className={section === id ? 'active' : ''} onClick={() => setSection(id)}>{label}</button>)}</div>
+    <div className="manage-tabs" role="tablist">{([['ingredients', '食材'], ['pickDishes', '自选菜'], ['recipes', '菜品套餐'], ['history', '记录'], ['backup', '上传备份'], ['settings', '设置']] as [Section, string][]).map(([id, label]) => <button key={id} role="tab" aria-selected={section === id} className={section === id ? 'active' : ''} onClick={() => setSection(id)}>{label}</button>)}</div>
 
     {section === 'ingredients' && <IngredientsSection data={data} updateData={updateData} onEdit={setIngredientEditor} />}
+    {section === 'pickDishes' && <PickDishSection data={data} updateData={updateData} onEdit={setPickDishEditor} />}
     {section === 'recipes' && <MenuSection data={data} updateData={updateData} editRecipe={setRecipeEditor} editPlan={setPlanEditor} />}
     {section === 'history' && <HistorySection data={data} updateData={updateData} onEdit={setHistoryEditor} />}
     {section === 'backup' && <BackupPanel data={data} updateData={updateData} notify={notify} />}
     {section === 'settings' && <SettingsPanel data={data} updateData={updateData} notify={notify} />}
 
     {ingredientEditor !== undefined && <IngredientEditor initial={ingredientEditor} onClose={() => setIngredientEditor(undefined)} onSave={(value) => { saveItem('ingredients', value, '食材已保存'); setIngredientEditor(undefined) }} />}
+    {pickDishEditor !== undefined && <PickDishEditor initial={pickDishEditor} onClose={() => setPickDishEditor(undefined)} onSave={(value) => { saveItem('pickDishItems', value, '自选菜已保存'); setPickDishEditor(undefined) }} />}
     {recipeEditor !== undefined && <RecipeEditor initial={recipeEditor} ingredients={data.ingredients} onClose={() => setRecipeEditor(undefined)} onSave={(value) => { saveItem('recipes', value, '菜品已保存'); setRecipeEditor(undefined) }} />}
     {planEditor !== undefined && <MealPlanEditor initial={planEditor} recipes={data.recipes} onClose={() => setPlanEditor(undefined)} onSave={(value) => { saveItem('mealPlans', value, '套餐已保存'); setPlanEditor(undefined) }} />}
     {historyEditor !== undefined && <HistoryEditor initial={historyEditor} onClose={() => setHistoryEditor(undefined)} onSave={(value) => { saveItem('history', value, '用餐记录已保存'); setHistoryEditor(undefined) }} />}
@@ -58,7 +61,7 @@ function BackupPanel({ data, updateData, notify }: { data: AppData; updateData: 
     } catch { notify('上传失败：无法读取这个 JSON 文件') }
   }
   return <section className="manage-section">
-    <div className="backup-hero"><Database /><h2>批量上传或导出</h2><p>JSON 文件包含食材、菜品、套餐、外卖、历史、采购清单和设置。</p></div>
+    <div className="backup-hero"><Database /><h2>批量上传或导出</h2><p>JSON 文件包含食材、自选菜、菜品、套餐、外卖、历史、采购清单和设置。</p></div>
     <button className="action-row" onClick={exportData}><Download /><div><strong>导出全部数据</strong><small>下载 JSON 备份文件</small></div><ChevronRight /></button>
     <button className="action-row" onClick={() => fileRef.current?.click()}><Upload /><div><strong>上传 JSON 恢复</strong><small>选择文件后会校验并二次确认</small></div><ChevronRight /></button>
     <input ref={fileRef} hidden type="file" accept="application/json,.json" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importFile(file); event.target.value = '' }} />

@@ -1,4 +1,4 @@
-import type { AppData, Ingredient, MealPlan, Recipe, TakeoutOption } from '../types'
+import type { AppData, Ingredient, MealPlan, PickDishItem, Recipe, TakeoutOption } from '../types'
 
 export const pantryNames = ['油', '盐', '生抽', '醋', '白糖']
 export const defaultTakeoutCategories = ['米饭', '面食', '快餐', '小吃', '清淡', '其他']
@@ -35,4 +35,31 @@ export const seedTakeouts: TakeoutOption[] = [
   ['t1','照烧鸡腿饭','米饭',28,35,'#e8a35d'],['t2','番茄牛腩饭','米饭',34,40,'#d97755'],['t3','红烧牛肉面','面食',30,32,'#c97a4c'],['t4','鲜虾云吞面','面食',26,30,'#dc9a6f'],['t5','汉堡套餐','快餐',32,25,'#e1a255'],['t6','生煎小笼','小吃',24,28,'#d7a978'],['t7','菌菇鸡汤','清淡',29,38,'#87a66d'],['t8','杂粮轻食碗','清淡',31,25,'#799f70'],['t9','麻辣烫','其他',27,35,'#d85e3f']
 ].map(([id,name,category,price,minutes,color]) => ({id:String(id),name:String(name),category:category as TakeoutOption['category'],price:Number(price),minutes:Number(minutes),color:String(color)}))
 
-export const seedData: AppData = { version:1, ingredients:seedIngredients, recipes:seedRecipes, mealPlans:seedMealPlans, takeouts:seedTakeouts, history:[], preferences:[], shopping:[], settings:{groceryUrl:'',takeoutCategories:defaultTakeoutCategories} }
+export const seedPickDishItems: PickDishItem[] = [
+  {id:'pick-fat-beef',name:'肥牛卷',categories:['火锅','水煮菜'],unit:'盒',enabled:true},
+  {id:'pick-lamb',name:'羊肉卷',categories:['火锅'],unit:'盒',enabled:true},
+  {id:'pick-tripe',name:'毛肚',categories:['火锅','水煮菜'],unit:'份',enabled:true},
+  {id:'pick-luncheon',name:'午餐肉',categories:['火锅','水煮菜'],unit:'盒',enabled:true},
+  {id:'pick-shrimp-paste',name:'虾滑',categories:['火锅'],unit:'盒',enabled:true},
+  {id:'pick-fish-ball',name:'鱼丸',categories:['火锅'],unit:'袋',enabled:true},
+  {id:'pick-fish',name:'鱼片',categories:['水煮菜'],unit:'份',enabled:true},
+  {id:'pick-beef',name:'牛肉片',categories:['水煮菜'],unit:'份',enabled:true},
+  {id:'pick-tofu',name:'嫩豆腐',categories:['火锅','水煮菜'],unit:'盒',enabled:true},
+  {id:'pick-tofu-skin',name:'千张',categories:['火锅','水煮菜','卤菜'],unit:'张',enabled:true},
+  {id:'pick-enoki',name:'金针菇',categories:['火锅','水煮菜'],unit:'把',enabled:true},
+  {id:'pick-lettuce',name:'生菜',categories:['火锅'],unit:'把',enabled:true},
+  {id:'pick-sprout',name:'豆芽',categories:['水煮菜'],unit:'袋',enabled:true},
+  {id:'pick-celtuce',name:'莴笋',categories:['水煮菜'],unit:'根',enabled:true},
+  {id:'pick-potato',name:'土豆片',categories:['火锅','水煮菜'],unit:'份',enabled:true},
+  {id:'pick-lotus',name:'藕片',categories:['火锅','水煮菜','卤菜'],unit:'份',enabled:true},
+  {id:'pick-kelp',name:'海带结',categories:['火锅','卤菜'],unit:'份',enabled:true},
+  {id:'pick-noodle',name:'宽粉',categories:['火锅','水煮菜'],unit:'袋',enabled:true},
+  {id:'pick-duck-neck',name:'鸭脖',categories:['卤菜'],unit:'份',enabled:true},
+  {id:'pick-duck-wing',name:'鸭翅',categories:['卤菜'],unit:'份',enabled:true},
+  {id:'pick-chicken-feet',name:'鸡爪',categories:['卤菜'],unit:'份',enabled:true},
+  {id:'pick-chicken-wing',name:'鸡翅',categories:['卤菜'],unit:'份',enabled:true},
+  {id:'pick-beef-shank',name:'牛腱',categories:['卤菜'],unit:'块',enabled:true},
+  {id:'pick-egg',name:'鸡蛋',categories:['卤菜'],unit:'个',enabled:true}
+]
+
+export const seedData: AppData = { version:1, ingredients:seedIngredients, recipes:seedRecipes, mealPlans:seedMealPlans, takeouts:seedTakeouts, pickDishItems:seedPickDishItems, history:[], preferences:[], shopping:[], settings:{groceryUrl:'',takeoutCategories:defaultTakeoutCategories} }
