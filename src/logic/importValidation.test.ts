@@ -9,4 +9,7 @@ describe('导入数据校验', () => {
     expect(validateImport({version:1,ingredients:[]})).toBe(false)
     expect(validateImport(null)).toBe(false)
   })
+  it('拒绝格式错误的自选菜数据', () => {
+    expect(validateImport({...seedData,pickDishItems:{name:'肥牛卷'}})).toBe(false)
+  })
 })

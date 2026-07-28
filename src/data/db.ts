@@ -1,5 +1,5 @@
 import { openDB } from 'idb'
-import { defaultTakeoutCategories, seedData } from './seed'
+import { defaultTakeoutCategories, seedData, seedPickDishItems } from './seed'
 import type { AppData } from '../types'
 
 const DB_NAME = 'jinwan-chi-shenme'
@@ -17,6 +17,7 @@ export function normalizeData(value: AppData): AppData {
     : [...new Set([...defaultTakeoutCategories, ...value.takeouts.map((item) => item.category).filter(Boolean)])]
   return {
     ...value,
+    pickDishItems: Array.isArray(value.pickDishItems) ? value.pickDishItems : structuredClone(seedPickDishItems),
     settings: {
       groceryUrl: value.settings?.groceryUrl ?? '',
       takeoutCategories

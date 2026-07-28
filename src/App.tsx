@@ -7,5 +7,6 @@ import { PlanDetailPage } from './pages/PlanDetailPage'
 import { RecommendationsPage } from './pages/RecommendationsPage'
 import { ShoppingPage } from './pages/ShoppingPage'
 import { TakeoutPage } from './pages/TakeoutPage'
+import { PickDishPage } from './pages/PickDishPage'
 
-export default function App(){return <Routes><Route element={<AppShell/>}><Route index element={<HomePage/>}/><Route path="takeout" element={<TakeoutPage/>}/><Route path="ingredients" element={<IngredientPage/>}/><Route path="recommendations" element={<RecommendationsPage/>}/><Route path="plan/:id" element={<PlanDetailPage/>}/><Route path="shopping" element={<ShoppingPage/>}/><Route path="manage" element={<ManagePage/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Route></Routes>}
+export default function App(){return <Routes><Route element={<AppShell/>}><Route index element={<HomePage/>}/><Route path="takeout" element={<TakeoutPage/>}/><Route path="ingredients" element={<IngredientPage/>}/><Route path="pick-dishes" element={<PickDishPage/>}/><Route path="recommendations" element={<RecommendationsPage/>}/><Route path="plan/:id" element={<PlanDetailPage/>}/><Route path="shopping" element={<ShoppingPage/>}/><Route path="manage" element={<ManagePage/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Route></Routes>}

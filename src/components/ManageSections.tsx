@@ -1,5 +1,5 @@
 import { Clock3, Edit3, History, Plus, Trash2 } from 'lucide-react'
-import type { AppData, Ingredient, MealHistory, MealPlan, Recipe } from '../types'
+import type { AppData, Ingredient, MealHistory, MealPlan, PickDishItem, Recipe } from '../types'
 
 type UpdateData = (updater: (current: AppData) => AppData, message?: string) => void
 
@@ -15,6 +15,18 @@ export function IngredientsSection({ data, updateData, onEdit }: { data: AppData
       <label className="switch"><input type="checkbox" checked={item.enabled} onChange={(event) => updateData((current) => ({ ...current, ingredients: current.ingredients.map((entry) => entry.id === item.id ? { ...entry, enabled: event.target.checked } : entry) }))} /><span /></label>
       <button className="icon-button compact" onClick={() => onEdit(item)} aria-label={`编辑${item.name}`}><Edit3 /></button>
       <button className="icon-button compact danger" onClick={() => { if (window.confirm(`删除食材“${item.name}”？相关菜谱中的引用也会被移除。`)) updateData((current) => ({ ...current, ingredients: current.ingredients.filter((entry) => entry.id !== item.id), recipes: current.recipes.map((recipe) => ({ ...recipe, required: recipe.required.filter((p) => p.ingredientId !== item.id), optional: recipe.optional.filter((p) => p.ingredientId !== item.id) })) }), '食材已删除') }} aria-label={`删除${item.name}`}><Trash2 /></button>
+    </div>)}</div>
+  </section>
+}
+
+export function PickDishSection({ data, updateData, onEdit }: { data: AppData; updateData: UpdateData; onEdit: (item: PickDishItem | null) => void }) {
+  return <section className="manage-section">
+    <div className="section-heading"><div><p className="eyebrow">自由搭配</p><h2>火锅、水煮菜和卤菜</h2></div><button className="small-add" onClick={() => onEdit(null)}><Plus />新增</button></div>
+    <div className="manage-list">{data.pickDishItems.map((item) => <div key={item.id}>
+      <MediaThumb name={item.name} /><div><strong>{item.name}</strong><small>{item.categories.join('、')} · {item.unit}</small></div>
+      <label className="switch"><input type="checkbox" checked={item.enabled} onChange={(event) => updateData((current) => ({ ...current, pickDishItems: current.pickDishItems.map((entry) => entry.id === item.id ? { ...entry, enabled: event.target.checked } : entry) }))} /><span /></label>
+      <button className="icon-button compact" onClick={() => onEdit(item)} aria-label={`编辑${item.name}`}><Edit3 /></button>
+      <button className="icon-button compact danger" onClick={() => { if (window.confirm(`删除自选菜“${item.name}”？`)) updateData((current) => ({ ...current, pickDishItems: current.pickDishItems.filter((entry) => entry.id !== item.id) }), '自选菜已删除') }} aria-label={`删除${item.name}`}><Trash2 /></button>
     </div>)}</div>
   </section>
 }

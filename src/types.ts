@@ -2,6 +2,7 @@ export type IngredientCategory = '肉蛋' | '蔬菜' | '主食' | '豆制品' | 
 export type Difficulty = '简单' | '中等' | '进阶'
 export type RecipeTag = '省时间' | '少洗锅' | '清淡' | '一锅完成'
 export type TakeoutCategory = string
+export type PickDishCategory = '火锅' | '水煮菜' | '卤菜'
 
 export interface Portion { ingredientId: string; amount: number; unit: string }
 export interface Substitution { ingredientId: string; alternatives: string[] }
@@ -51,6 +52,14 @@ export interface TakeoutOption {
   image?: string
 }
 
+export interface PickDishItem {
+  id: string
+  name: string
+  categories: PickDishCategory[]
+  unit: string
+  enabled: boolean
+}
+
 export interface MealHistory {
   id: string
   kind: 'recipe' | 'mealPlan' | 'takeout'
@@ -85,6 +94,7 @@ export interface AppData {
   recipes: Recipe[]
   mealPlans: MealPlan[]
   takeouts: TakeoutOption[]
+  pickDishItems: PickDishItem[]
   history: MealHistory[]
   preferences: UserPreference[]
   shopping: ShoppingItem[]
